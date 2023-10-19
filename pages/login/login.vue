@@ -18,7 +18,6 @@
       <nut-button block type="primary" @click="loginFunc" :disabled="isDisabled"
         >登录</nut-button
       >
-
     </div>
   </div>
 </template>
@@ -31,7 +30,10 @@ const loginPassword = ref("");
 const showBasic = ref(false);
 const getCompanyList = async () => {
   const res = await wxappMyCompany();
-  showBasic.value = true
+  showBasic.value = true;
+  uni.navigateTo({
+    url: "../index/index",
+  });
   console.log("res:", res);
 };
 const wxLoginFun = async (params) => {
