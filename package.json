@@ -1,0 +1,16 @@
+{
+  "id": "nutui-jd-mine",
+  "name": "仿京东个人中心页面",
+  "displayName": "仿京东个人中心页面",
+  "version": "1.0.0",
+  "description": "使用nutui+vue3写出的个人中心模版,模仿京东个人中心单页面，直接就上手，省去开发css页面成本。",
+  "keywords": [
+    "nutui,vue3,template"
+  ],
+  "dcloudext": {
+    "category": [
+      "uni-app前端模板",
+      "uni-app前端项目模板"
+    ]
+  }
+}
