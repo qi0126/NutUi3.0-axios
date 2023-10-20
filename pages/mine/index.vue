@@ -267,7 +267,6 @@ const getMyInfo = async () => {
       account: res?.user?.account,
       companyName: res?.currentCompany?.companyName,
     };
-    console.log("用户信息:", userInfoData.value);
   } catch (err) {
     console.err("err:", err);
   }
@@ -289,7 +288,7 @@ const logoutFunc = async (data, code) => {
     uni.clearStorageSync();
     toLoginFun();
   } catch (err) {
-    console.log(err);
+    console.error(err);
   }
 };
 const preLogout = async (loginRes) => {

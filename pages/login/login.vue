@@ -138,7 +138,7 @@ const autoLoginFunc = async (data, code) => {
       },
     });
   } catch (err) {
-    console.log(err);
+    console.error(err);
   }
 };
 const preLogin = (loginRes) => {
@@ -159,7 +159,7 @@ const autoLoginFun = () => {
       preLogin(loginRes);
     },
     fail: (err) => {
-      console.log(err);
+      console.error(err);
     },
   });
 };

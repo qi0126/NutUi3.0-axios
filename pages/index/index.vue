@@ -71,7 +71,7 @@ const logoutFunc = async (data, code) => {
     uni.clearStorageSync();
     toLoginFun();
   } catch (err) {
-    console.log(err);
+    console.error(err);
   }
 };
 const preLogout = async (loginRes) => {

@@ -249,7 +249,6 @@ watch(
 watch(
   () => props.visible,
   (val) => {
-    // console.log('watch: props.visible', val);
     // TODO: value为空时，保留上次选择记录，修复单元测试问题
     if (val && Array.isArray(innerValue.value) && innerValue.value.length > 0)
       syncValue()
