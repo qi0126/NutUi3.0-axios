@@ -24,17 +24,19 @@
 
 <script setup>
 import { ref, computed } from "vue";
-import { wxappLoginN, wxappMyCompany } from "@/api/api";
+import { wxappLoginN, wxappMyCompany, autoLogin } from "@/api/api";
+import { onLoad } from "@dcloudio/uni-app";
+
 const loginName = ref("");
 const loginPassword = ref("");
 const showBasic = ref(false);
+const userInfo = ref({});
 const getCompanyList = async () => {
   const res = await wxappMyCompany();
   showBasic.value = true;
   uni.navigateTo({
     url: "../index/index",
   });
-  console.log("res:", res);
 };
 const wxLoginFun = async (params) => {
   try {
@@ -65,6 +67,36 @@ const loginFunc = () => {
 };
 const isDisabled = computed(() => {
   return !(loginName.value.length && loginPassword.value.length);
+});
+const autoLoginFunc = async (data, code) => {
+  let params ={ code, data: data.encryptedData, iv: data.iv }
+  const res = await autoLogin(params);
+  console.log("autoLoginFunc:", params,res);
+};
+const preLogin = (loginRes) => {
+  if (loginRes.code) {
+    uni.getUserInfo({
+      success: (res) => {
+        userInfo.value = res.userInfo;
+        autoLoginFunc(res, loginRes.code);
+      },
+    });
+  }
+};
+const autoLoginFun = () => {
+  uni.login({
+    provider: "weixin",
+    success: function (loginRes) {
+      preLogin(loginRes);
+    },
+    fail: (err) => {
+      console.log(err);
+    },
+  });
+};
+
+onLoad(() => {
+  autoLoginFun();
 });
 </script>
 <style>

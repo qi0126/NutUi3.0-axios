@@ -28,7 +28,6 @@ function request(url, data, method = "GET", options = {}) {
         title: "加载中",
       });
     }
-    console.log("bbbb:", url, data);
     uni.request({
       url: `${baseApiUrl + url}`,
       method,
@@ -40,7 +39,6 @@ function request(url, data, method = "GET", options = {}) {
       },
       timeout,
       success: (res) => {
-        console.log("res:", res);
         if (res.statusCode == 200) {
           resolve(res.data);
         } else {

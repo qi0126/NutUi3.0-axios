@@ -1,6 +1,6 @@
 import http from './http.js'
 
-// 获取验证码，这个函数指的是使用GET请求请求目标服务器的
+// 获取token，自动登录
 export function autoLogin(params) {
     return http.post("/wxapp/autoLogin",params)
 }  
@@ -9,7 +9,7 @@ export function wxappLoginN(params) {
     return http.post("/wxapp/loginN", params)
 }
 
-//
+//我的公司
 export function wxappMyCompany(params) {
     return http.get("/wxapp/myCompany", params)
 }

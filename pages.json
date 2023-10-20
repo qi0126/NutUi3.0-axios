@@ -8,15 +8,16 @@
       }
     },
     {
-      "path": "pages/mine/index",
-      "style": {
-        "navigationBarTitleText": "个人中心"
-      }
-    },
-    {
       "path": "pages/index/index",
       "style": {
         "navigationBarTitleText": "index"
+      }
+    },
+
+    {
+      "path": "pages/mine/index",
+      "style": {
+        "navigationBarTitleText": "个人中心"
       }
     }
   ],

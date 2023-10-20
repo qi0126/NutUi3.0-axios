@@ -12,5 +12,8 @@
       "uni-app前端模板",
       "uni-app前端项目模板"
     ]
+  },
+  "dependencies": {
+    "@dcloudio/uni-app": "^2.0.2-3081220230817001"
   }
 }

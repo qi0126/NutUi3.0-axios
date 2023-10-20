@@ -1,52 +1,28 @@
 <template>
-	<view class="content">
-		<image class="logo" src="/static/logo.png"></image>
-		<view class="text-area">
-			<text class="title">{{title}}</text>
-		</view>
-	</view>
+  <div class="page">
+    <nut-navbar @on-click-back="back" @on-click-title="title" title="订单详情">
+      <template #left>
+        <div>返回</div>
+      </template>
+      <template #right>
+        <nut-icon name="share-n" share-n width="16px" />
+      </template>
+    </nut-navbar>
+  </div>
 </template>
 
-<script>
-	export default {
-		data() {
-			return {
-				title: 'Hello'
-			}
-		},
-		onLoad() {
-
-		},
-		methods: {
-
-		}
-	}
+<script setup>
+import { ref, computed } from "vue";
+import { autoLogin } from "@/api/api";
 </script>
-
 <style>
-	.content {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-	}
-
-	.logo {
-		height: 200rpx;
-		width: 200rpx;
-		margin-top: 200rpx;
-		margin-left: auto;
-		margin-right: auto;
-		margin-bottom: 50rpx;
-	}
-
-	.text-area {
-		display: flex;
-		justify-content: center;
-	}
-
-	.title {
-		font-size: 36rpx;
-		color: #8f8f94;
-	}
+page {
+  background: #f2f2f2;
+  color: #333;
+  font-weight: 400;
+}
 </style>
+<style lang="scss" scoped>
+.page{
+	width:100%
+}</style>
