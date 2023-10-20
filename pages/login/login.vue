@@ -137,6 +137,14 @@ const autoLoginFunc = async (data, code) => {
         toIndexFun();
       },
     });
+    uni.setStorage({
+      key: "wxData",
+      data: {
+        wxData: data,
+        code,
+      },
+      success() {},
+    });
   } catch (err) {
     console.error(err);
   }

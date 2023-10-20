@@ -304,7 +304,7 @@ const onOk = () => {
   uni.login({
     provider: "weixin",
     success: function (loginRes) {
-      preLogout(loginRes);
+       preLogout(loginRes);
     },
   });
 };
