@@ -14,6 +14,7 @@
     ]
   },
   "dependencies": {
-    "@dcloudio/uni-app": "^2.0.2-3081220230817001"
+    "@dcloudio/uni-app": "^2.0.2-3081220230817001",
+    "moment": "^2.29.4"
   }
 }

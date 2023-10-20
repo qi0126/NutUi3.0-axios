@@ -115,7 +115,7 @@
 <script setup>
 import { ref } from "vue";
 import { wxappMyInfo,wxappLogout } from "@/api/api";
-import { menuList } from "@/api/publicData";
+import { menuList } from "@/utils/publicData";
 import { onLoad } from "@dcloudio/uni-app";
 const active = ref(2);
 const menuIndex = 2;

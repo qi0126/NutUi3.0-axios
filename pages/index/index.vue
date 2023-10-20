@@ -1,25 +1,63 @@
 <template>
   <div class="page">
-    <nut-navbar @on-click-back="back" @on-click-title="title" title="订单详情">
-      <template #left>
-        <div>返回</div>
+    <nut-loading-page :loading="pageLoading" />
+    <nut-navbar>
+      <template #content>
+        <nut-input v-model="searchTxt" placeholder="请输入报料对象查询">
+          <template #left> <nut-icon name="search2" /> </template
+        ></nut-input>
       </template>
       <template #right>
-        <nut-icon
-          name="share-n"
-          share-n
-          width="16px"
-          @click="isShowLogout = true"
-        />
+        <nut-button type="primary" size="small">报料</nut-button>
       </template>
     </nut-navbar>
-    <nut-dialog
-      title="退出账号"
-      content="确定退出当前账号"
-      v-model:visible="isShowLogout"
-      @cancel="isShowLogout = false"
-      @ok="onOk"
-    />
+
+    <div>
+      <div class="data-div">
+        <div class="data-div-left">查询结果 {{ dataS.rowSize || 0 }} 条</div>
+        <div class="data-div-right">筛选</div>
+      </div>
+      <div>
+        <nut-list
+          v-if="dataS.data && dataS.data.length"
+          :height="200"
+          :listData="dataS.data || []"
+          @scroll="handleScroll"
+        >
+          <template v-slot="{ item, index }">
+            <div class="list-item">
+              <div
+                class="list-item-title"
+                :style="{ color: statusObj[item.status].color }"
+              >
+                {{ statusObj[item.status].label }}
+              </div>
+              <div>
+                <nut-cell-group>
+                  <nut-cell
+                    title="报料对象"
+                    icon="my"
+                    :desc="item.receiveCompany"
+                    is-link
+                  ></nut-cell>
+                  <nut-cell
+                    title="报料总重"
+                    :desc="getWeight(item.totalGramWeight)"
+                  ></nut-cell>
+                  <nut-cell
+                    title="交货时间"
+                    :desc="getTime(item.billDate)"
+                  ></nut-cell>
+                </nut-cell-group>
+              </div>
+            </div>
+          </template>
+        </nut-list>
+        <div v-else>
+          <nut-empty image="empty" description="无内容"></nut-empty>
+        </div>
+      </div>
+    </div>
     <nut-tabbar
       bottom
       safe-area-inset-bottom
@@ -38,13 +76,35 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
-import { wxappLogout } from "@/api/api";
-import { menuList } from "@/api/publicData";
-const isShowLogout = ref(false);
+import moment from "moment";
+import { onLoad } from "@dcloudio/uni-app";
+import { ref, computed, watch } from "vue";
+import { material_appletGetList } from "@/api/api";
+import utils from "@/utils/index";
+import { menuList } from "@/utils/publicData";
 const active = ref(0);
-const menuIndex = 0
+const menuIndex = 0;
+const searchTxt = ref("");
+const dataS = ref({});
+const pageLoading = ref(false);
+const statusObj = {
+  0: { label: "待确认", color: "#ee0a24" },
+  1: { label: "已确认", color: "#33333" },
+};
 
+const getData = async () => {
+  pageLoading.value = true;
+  try {
+    let params = { keyWord: searchTxt.value, pageIndex: 1, rows: 9999 };
+    const res = await material_appletGetList(params);
+    dataS.value = res;
+    console.log("列表:", res);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    pageLoading.value = false;
+  }
+};
 const tabSwitch = (item, index) => {
   if (index != menuIndex) {
     //不是当前菜单才跳转
@@ -53,44 +113,20 @@ const tabSwitch = (item, index) => {
     });
   }
 };
+const getTime = (time) => {
+  return moment(time).format("YYYY-MM-DD");
+};
+const getWeight = (weight) => {
+  if (!weight) return "0 kg";
+  return utils.moneyFormat(weight) + " kg";
+};
+watch(searchTxt, () => {
+  getData();
+});
 
-const toLoginFun = () => {
-  uni.reLaunch({
-    url: "../login/login",
-  });
-};
-const logoutFunc = async (data, code) => {
-  let params = { code, data: data.encryptedData, iv: data.iv };
-  try {
-    uni.showToast({
-      title: "退出成功,请重新登录",
-      icon: "none",
-      duration: 2000,
-    });
-    const res = await wxappLogout(params);
-    uni.clearStorageSync();
-    toLoginFun();
-  } catch (err) {
-    console.error(err);
-  }
-};
-const preLogout = async (loginRes) => {
-  if (loginRes.code) {
-    uni.getUserInfo({
-      success: (res) => {
-        logoutFunc(res, loginRes.code);
-      },
-    });
-  }
-};
-const onOk = () => {
-  uni.login({
-    provider: "weixin",
-    success: function (loginRes) {
-      preLogout(loginRes);
-    },
-  });
-};
+onLoad(() => {
+  getData();
+});
 </script>
 <style>
 page {
@@ -98,9 +134,33 @@ page {
   color: #333;
   font-weight: 400;
 }
+:root,
+page {
+  --nut-cell-box-shadow: 0;
+  --nut-cell-group-desc-color: #000;
+}
 </style>
 <style lang="scss" scoped>
 .page {
   width: 100%;
+  .data-div {
+    display: flex;
+    .data-div-left {
+      width: 50%;
+    }
+    .data-div-right {
+      width: 50%;
+      text-align: right;
+    }
+  }
+  .list-item {
+    background: #fff;
+    padding: 0 32rpx 18rpx 32rpx;
+    .list-item-title {
+      border-bottom: 1rpx solid #f0f0f0;
+      line-height: 72rpx;
+      text-align: right;
+    }
+  }
 }
 </style>
