@@ -30,4 +30,9 @@ export function wxappLogout(params) {
     return http.post("/wxapp/logout", params)
 }
 
+// 用户信息
+export function wxappMyInfo(params) {
+    return http.get("/wxapp/myInfo", params)
+}
+
 

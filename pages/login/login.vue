@@ -63,7 +63,7 @@ const userInfo = ref({});
 const companyList = ref([]);
 
 const toIndexFun = () => {
-  uni.navigateTo({
+  uni.reLaunch({
     url: "../index/index",
   });
 };

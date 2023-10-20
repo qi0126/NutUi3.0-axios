@@ -55,7 +55,7 @@ const tabSwitch = (item, index) => {
 };
 
 const toLoginFun = () => {
-  uni.navigateTo({
+  uni.reLaunch({
     url: "../login/login",
   });
 };

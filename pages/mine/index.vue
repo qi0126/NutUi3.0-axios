@@ -4,18 +4,25 @@
       <div class="per flex">
         <image
           class="user-face"
-          src="https://img12.360buyimg.com/imagetools/jfs/t1/196430/38/8105/14329/60c806a4Ed506298a/e6de9fb7b8490f38.png"
+          :src="userImg"
         />
         <div class="user-info">
-          <div class="name">小猪佩奇奇妙冒险</div>
+          <div class="name">{{ userInfoData.account || "-" }}</div>
           <div>
-            <nut-tag plain>学生特权</nut-tag>
+            <nut-tag plain>{{ userInfoData.companyName || "-" }}</nut-tag>
           </div>
         </div>
       </div>
-      <div class="setup">
+      <div class="setup" @click="isShowLogout = true">
         <nut-icon name="setting" size="28rpx"></nut-icon>
       </div>
+      <nut-dialog
+        title="退出账号"
+        content="确定退出当前账号"
+        v-model:visible="isShowLogout"
+        @cancel="isShowLogout = false"
+        @ok="onOk"
+      />
     </div>
     <div class="mine-order">
       <div class="operation-list flex">
@@ -107,7 +114,9 @@
 
 <script setup>
 import { ref } from "vue";
+import { wxappMyInfo,wxappLogout } from "@/api/api";
 import { menuList } from "@/api/publicData";
+import { onLoad } from "@dcloudio/uni-app";
 const active = ref(2);
 const menuIndex = 2;
 
@@ -235,6 +244,9 @@ const goodsList = ref([
     shopName: "阳澄湖大闸蟹自营店>",
   },
 ]);
+const userInfoData = ref({});
+const isShowLogout = ref(false);
+const userImg = ref("")
 const tabSwitch = (item, index) => {
   if (index != menuIndex) {
     //不是当前菜单才跳转
@@ -243,6 +255,63 @@ const tabSwitch = (item, index) => {
     });
   }
 };
+const getMyInfo = async () => {
+  try {
+		uni.getUserInfo({
+      success: (res) => {
+				userImg.value = res?.userInfo?.avatarUrl
+      },
+    });
+    const res = await wxappMyInfo();
+    userInfoData.value = {
+      account: res?.user?.account,
+      companyName: res?.currentCompany?.companyName,
+    };
+    console.log("用户信息:", userInfoData.value);
+  } catch (err) {
+    console.err("err:", err);
+  }
+};
+const toLoginFun = () => {
+  uni.reLaunch({
+    url: "../login/login",
+  });
+};
+const logoutFunc = async (data, code) => {
+  let params = { code, data: data.encryptedData, iv: data.iv };
+  try {
+    uni.showToast({
+      title: "退出成功,请重新登录",
+      icon: "none",
+      duration: 2000,
+    });
+    const res = await wxappLogout(params);
+    uni.clearStorageSync();
+    toLoginFun();
+  } catch (err) {
+    console.log(err);
+  }
+};
+const preLogout = async (loginRes) => {
+  if (loginRes.code) {
+    uni.getUserInfo({
+      success: (res) => {
+        logoutFunc(res, loginRes.code);
+      },
+    });
+  }
+};
+const onOk = () => {
+  uni.login({
+    provider: "weixin",
+    success: function (loginRes) {
+      preLogout(loginRes);
+    },
+  });
+};
+onLoad(() => {
+  getMyInfo();
+});
 </script>
 <style>
 page {
