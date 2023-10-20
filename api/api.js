@@ -13,3 +13,21 @@ export function wxappLoginN(params) {
 export function wxappMyCompany(params) {
     return http.get("/wxapp/myCompany", params)
 }
+
+// 退出登录
+export function wxappAutoLogin(params) {
+    return http.post("/wxapp/autoLogin", params)
+}
+
+// 公司Code登录
+export function wxappLoginN2(params) {
+    return http.post("/wxapp/loginN2", params)
+}
+
+
+// 退出登录
+export function wxappLogout(params) {
+    return http.post("/wxapp/logout", params)
+}
+
+

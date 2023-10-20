@@ -19,24 +19,82 @@
         >登录</nut-button
       >
     </div>
+    <nut-popup
+      :custom-style="{ width: '80%' }"
+      round
+      v-model:visible="showBasic"
+    >
+      <div class="company">
+        <div class="company-title">
+          <div class="company-title-txt">选择企业</div>
+          <div class="company-title-del" @click="showBasic = false">
+            <nut-icon name="close" size="12" custom-color="#999"></nut-icon>
+          </div>
+        </div>
+        <div class="company-div">
+          <div
+            class="company-sub-div"
+            @click="checkCompany(item)"
+            v-for="(item, index) in companyList"
+            :key="index"
+          >
+            {{ item.value || "-" }}
+          </div>
+        </div>
+      </div>
+    </nut-popup>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from "vue";
-import { wxappLoginN, wxappMyCompany, autoLogin } from "@/api/api";
+import {
+  wxappLoginN,
+  wxappMyCompany,
+  autoLogin,
+  wxappLoginN2,
+} from "@/api/api";
 import { onLoad } from "@dcloudio/uni-app";
 
 const loginName = ref("");
 const loginPassword = ref("");
 const showBasic = ref(false);
 const userInfo = ref({});
-const getCompanyList = async () => {
-  const res = await wxappMyCompany();
-  showBasic.value = true;
+const companyList = ref([]);
+
+const toIndexFun = () => {
   uni.navigateTo({
     url: "../index/index",
   });
+};
+const wxappLogin = async (params) => {
+  try {
+    const res = await wxappLoginN2(params);
+    toIndexFun();
+  } catch (err) {
+    console.error("公司登录失败:", err);
+  }
+};
+const checkCompany = (item) => {
+  uni.login({
+    provider: "weixin",
+    success: function (loginRes) {
+      let params = {
+        companyId: item.code,
+        code: loginRes.code,
+      };
+      wxappLogin(params);
+    },
+  });
+};
+const getCompanyList = async () => {
+  const res = await wxappMyCompany();
+  companyList.value = res;
+  if (res.length > 1) {
+    showBasic.value = true;
+  } else {
+    checkCompany(res[0]);
+  }
 };
 const wxLoginFun = async (params) => {
   try {
@@ -69,9 +127,19 @@ const isDisabled = computed(() => {
   return !(loginName.value.length && loginPassword.value.length);
 });
 const autoLoginFunc = async (data, code) => {
-  let params ={ code, data: data.encryptedData, iv: data.iv }
-  const res = await autoLogin(params);
-  console.log("autoLoginFunc:", params,res);
+  let params = { code, data: data.encryptedData, iv: data.iv };
+  try {
+    const res = await autoLogin(params);
+    uni.setStorage({
+      key: "accessToken",
+      data: res,
+      success() {
+        toIndexFun();
+      },
+    });
+  } catch (err) {
+    console.log(err);
+  }
 };
 const preLogin = (loginRes) => {
   if (loginRes.code) {
@@ -83,6 +151,7 @@ const preLogin = (loginRes) => {
     });
   }
 };
+
 const autoLoginFun = () => {
   uni.login({
     provider: "weixin",
@@ -123,6 +192,34 @@ page {
   .login-btn {
     margin-top: 50rpx;
     width: 100%;
+  }
+  .company {
+    max-height: 400rpx;
+    .company-title {
+      display: flex;
+
+      font-size: 28rpx;
+      color: #333;
+      line-height: 80rpx;
+      .company-title-txt {
+        text-align: center;
+        flex: 10;
+      }
+      .company-title-del {
+        flex: 1;
+      }
+    }
+    .company-div {
+      max-height: 400rpx;
+      overflow-y: auto;
+      .company-sub-div {
+        border-top: 1rpx solid #f0f0f0;
+        font-size: 28rpx;
+        color: #333;
+        text-align: center;
+        line-height: 80rpx;
+      }
+    }
   }
 }
 </style>

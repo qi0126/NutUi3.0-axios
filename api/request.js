@@ -39,7 +39,9 @@ function request(url, data, method = "GET", options = {}) {
       },
       timeout,
       success: (res) => {
-        if (res.statusCode == 200) {
+        if (res.data === "请先账号密码登录") {
+          return;
+        } else if (res.statusCode == 200) {
           resolve(res.data);
         } else {
           if (res.statusCode == 403) {
