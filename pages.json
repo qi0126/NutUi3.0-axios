@@ -13,11 +13,22 @@
         "navigationBarTitleText": "首页"
       }
     },
-
     {
       "path": "pages/mine/index",
       "style": {
         "navigationBarTitleText": "个人中心"
+      }
+    },
+    {
+      "path": "pages/detail/detail",
+      "style": {
+        "navigationBarTitleText": "订单详情"
+      }
+    },
+    {
+      "path": "pages/edit/edit",
+      "style": {
+        "navigationBarTitleText": "订单编辑"
       }
     }
   ],

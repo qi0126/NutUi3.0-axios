@@ -25,7 +25,7 @@
           @scroll="handleScroll"
         >
           <template v-slot="{ item, index }">
-            <div class="list-item">
+            <div class="list-item" @click="toDetail(item)">
               <div
                 class="list-item-title"
                 :style="{ color: statusObj[item.status].color }"
@@ -98,7 +98,6 @@ const getData = async () => {
     let params = { keyWord: searchTxt.value, pageIndex: 1, rows: 9999 };
     const res = await material_appletGetList(params);
     dataS.value = res;
-    console.log("列表:", res);
   } catch (err) {
     console.error(err);
   } finally {
@@ -123,6 +122,11 @@ const getWeight = (weight) => {
 watch(searchTxt, () => {
   getData();
 });
+const toDetail = (e)=>{
+  uni.navigateTo({
+    url: `/pages/detail/detail?id=${e.id}`
+  });
+}
 
 onLoad(() => {
   getData();

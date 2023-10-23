@@ -38,3 +38,9 @@ export function wxappMyInfo(params) {
 export function material_appletGetList(params) {
   return http.postJson("/material_applet/getList", params);
 }
+
+// 单据详情
+export function material_appletGetMaterialInfo(params) {
+  return http.get("/material_applet/getMaterialInfo", params);
+}
+
