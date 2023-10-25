@@ -38,7 +38,7 @@
             <nut-date-picker
               v-model="currentDate"
               title="时间选择"
-              type="datehour"
+              type="datetime"
               :min-date="minDate"
               :max-date="maxDate"
               :filter="filter"
@@ -54,7 +54,8 @@
         >
           <nut-input
             v-model="orderDetailObj.billMark"
-            class="nut-input-text"
+            clearable
+            max-length="50"
             placeholder="请输入"
             type="text"
           />
@@ -130,15 +131,15 @@ const formatter = (type, option) => {
       option.text += "时";
       break;
     default:
-      option.text += "";
+      option.text += "分";
   }
   return option;
 };
 
 const filter = (type, options) => {
-  if (type == "hour") {
-    return options.filter((option) => Number(option.value) % 6 === 0);
-  }
+  // if (type == "hour") {
+  //   return options.filter((option) => Number(option.value) % 1 === 0);
+  // }
   return options;
 };
 const confirm = ({ selectedValue, selectedOptions }) => {

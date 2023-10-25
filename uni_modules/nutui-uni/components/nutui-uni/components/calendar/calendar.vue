@@ -1,82 +1,85 @@
 <script setup lang="ts">
-import { computed, defineComponent, ref, useSlots, watch } from 'vue'
-import { PREFIX } from '../_utils'
-import type { CalendarInst } from '../calendaritem/type'
-import NutPoPUp from '../popup/popup.vue'
-import NutCalendarItem from '../calendaritem/calendaritem.vue'
-import { calendarEmits, calendarProps } from './calendar'
+import { computed, defineComponent, ref, useSlots, watch } from "vue";
+import { PREFIX } from "../_utils";
+import type { CalendarInst } from "../calendaritem/type";
+import NutPoPUp from "../popup/popup.vue";
+import NutCalendarItem from "../calendaritem/calendaritem.vue";
+import { calendarEmits, calendarProps } from "./calendar";
 
-const props = defineProps(calendarProps)
-const emit = defineEmits(calendarEmits)
-const slots = useSlots()
+const props = defineProps(calendarProps);
+const emit = defineEmits(calendarEmits);
+const slots = useSlots();
 defineExpose({
   scrollToDate,
   initPosition,
-})
+});
 const showTopBtn = computed(() => {
-  return slots.btn
-})
+  return slots.btn;
+});
 const topInfo = computed(() => {
-  return slots['top-info']
-})
+  return slots["top-info"];
+});
 const dayInfo = computed(() => {
-  return slots.day
-})
+  return slots.day;
+});
 const bottomInfo = computed(() => {
-  return slots['bottom-info']
-})
-const show = ref(props.visible)
+  return slots["bottom-info"];
+});
+const show = ref(props.visible);
 // element refs
-const calendarRef = ref<null | CalendarInst>(null)
+const calendarRef = ref<null | CalendarInst>(null);
 function scrollToDate(date: string) {
-  calendarRef.value?.scrollToDate(date)
+  calendarRef.value?.scrollToDate(date);
 }
 function initPosition() {
-  calendarRef.value?.initPosition()
+  calendarRef.value?.initPosition();
 }
 
 // methods
 function update() {
-  show.value = false
-  emit('update:visible', false)
+  show.value = false;
+  emit("update:visible", false);
 }
 
 function close() {
-  show.value = false
-  emit('close')
-  emit('update:visible', false)
+  show.value = false;
+  emit("close");
+  emit("update:visible", false);
 }
 
 function choose(param: string) {
-  close()
-  emit('choose', param)
+  close();
+  emit("choose", param);
 }
 
 function closePopup() {
-  close()
+  close();
 }
 function select(param: string) {
   // close();
-  emit('select', param)
+  emit("select", param);
 }
+const returnFunc = () => {
+  emit("returnFunc");
+};
 watch(
   () => props.visible,
   (value: boolean) => {
-    show.value = value
-  },
-)
+    show.value = value;
+  }
+);
 </script>
 
 <script lang="ts">
-const componentName = `${PREFIX}-calendar`
+const componentName = `${PREFIX}-calendar`;
 export default defineComponent({
   name: componentName,
   options: {
     virtualHost: true,
     addGlobalClass: true,
-    styleIsolation: 'shared',
+    styleIsolation: "shared",
   },
-})
+});
 </script>
 
 <template>
@@ -91,6 +94,7 @@ export default defineComponent({
     @click-overlay="closePopup"
     @click-close-icon="closePopup"
   >
+    <div class="return-txt" @click="returnFunc">清空</div>
     <NutCalendarItem
       v-if="show"
       ref="calendarRef"
@@ -165,5 +169,14 @@ export default defineComponent({
 </template>
 
 <style lang="scss">
-@import './index';
+@import "./index";
+</style>
+<style lang="scss" scoped>
+.return-txt {
+  top: 2px;
+  width: 150rpx;
+  position: absolute;
+  z-index: 1;
+  margin-left: 20rpx;
+}
 </style>

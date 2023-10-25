@@ -15,7 +15,21 @@
     <div>
       <div class="data-div">
         <div class="data-div-left">查询结果 {{ dataS.rowSize || 0 }} 条</div>
-        <div class="data-div-right">筛选</div>
+        <div class="data-div-right" @click="openSwitch">
+          {{ showDataTxt }}
+        </div>
+        <nut-calendar
+          v-model:visible="isVisible"
+          :default-value="dateStart"
+          type="range"
+          :start-date="startDate"
+          :end-date="endDate"
+          @select="selectDate"
+          @close="closeSwitch('isVisible')"
+          @choose="setChooseValue"
+          @returnFunc="returnFunc"
+        >
+        </nut-calendar>
       </div>
       <div>
         <nut-list
@@ -59,6 +73,7 @@
       </div>
     </div>
     <nut-tabbar
+      v-if="!isVisible"
       bottom
       safe-area-inset-bottom
       placeholder
@@ -91,11 +106,51 @@ const statusObj = {
   0: { label: "待确认", color: "#ee0a24" },
   1: { label: "已确认", color: "#33333" },
 };
+const startDate = ref(
+  moment()
+    .month(moment().month() - 3)
+    .format("YYYY-MM-DD")
+);
+const endDate = ref(
+  moment()
+    .month(moment().month() + 3)
+    .format("YYYY-MM-DD")
+);
+const dateStart = ref([
+  moment().format("YYYY-MM-DD"),
+  moment().format("YYYY-MM-DD"),
+]);
+const isVisible = ref(false);
+const dateTimeList = ref([]);
+const showDataTxt = computed(() => {
+  return dateTimeList.value.length === 2
+    ? `${dateTimeList.value[0]}至${dateTimeList.value[1]}`
+    : `筛选`;
+});
+const openSwitch = () => {
+  if (dateTimeList.value.length === 2) {
+    console.log("openSwitch", dateTimeList.value);
+    dateStart.value = [dateTimeList.value[0], dateTimeList.value[1]];
+  } else {
+    dateStart.value = [
+      moment().format("YYYY-MM-DD"),
+      moment().format("YYYY-MM-DD"),
+    ];
+  }
+  isVisible.value = true;
+};
+const closeSwitch = () => {
+  isVisible.value = false;
+};
 
 const getData = async () => {
   pageLoading.value = true;
   try {
     let params = { keyWord: searchTxt.value, pageIndex: 1, rows: 9999 };
+    if (dateTimeList.value.length === 2) {
+      params.createDateStart = dateTimeList.value[0];
+      params.createDateEnd = dateTimeList.value[1];
+    }
     const res = await material_appletGetList(params);
     dataS.value = res;
   } catch (err) {
@@ -119,14 +174,30 @@ const getWeight = (weight) => {
   if (!weight) return "0 kg";
   return utils.moneyFormat(weight) + " kg";
 };
+const selectDate = (param) => {
+  if (param.length === 2) {
+    dateTimeList.value = [param[0][3], param[1][3]];
+  } else {
+    dateTimeList.value = [];
+  }
+  getData();
+};
+const setChooseValue = () => {
+  getData();
+};
 watch(searchTxt, () => {
   getData();
 });
-const toDetail = (e)=>{
+const toDetail = (e) => {
   uni.navigateTo({
-    url: `/pages/detail/detail?id=${e.id}`
+    url: `/pages/detail/detail?id=${e.id}`,
   });
-}
+};
+const returnFunc = () => {
+  dateTimeList.value = [];
+  isVisible.value = false;
+  getData();
+};
 
 onLoad(() => {
   getData();
@@ -148,7 +219,10 @@ page {
 .page {
   width: 100%;
   .data-div {
+    line-height: 80rpx;
+    margin-top: -32rpx;
     display: flex;
+    padding: 0 20rpx;
     .data-div-left {
       width: 50%;
     }
