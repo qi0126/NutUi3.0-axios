@@ -2,14 +2,14 @@
   <div class="mine">
     <div class="mine-detail flex">
       <div class="per flex">
-        <image
-          class="user-face"
-          :src="userImg"
-        />
+        <image class="user-face" :src="userImg" />
         <div class="user-info">
           <div class="name">{{ userInfoData.account || "-" }}</div>
           <div>
             <nut-tag plain>{{ userInfoData.companyName || "-" }}</nut-tag>
+            <span class="change-company-span" @click="openCompany"
+              >切换公司</span
+            >
           </div>
         </div>
       </div>
@@ -23,6 +23,30 @@
         @cancel="isShowLogout = false"
         @ok="onOk"
       />
+      <nut-popup
+        :custom-style="{ width: '80%' }"
+        round
+        v-model:visible="showBasic"
+      >
+        <div class="company">
+          <div class="company-title">
+            <div class="company-title-txt">选择企业</div>
+            <div class="company-title-del" @click="showBasic = false">
+              <nut-icon name="close" size="12" custom-color="#999"></nut-icon>
+            </div>
+          </div>
+          <div class="company-div">
+            <div
+              class="company-sub-div"
+              @click="checkCompany(item)"
+              v-for="(item, index) in companyList"
+              :key="index"
+            >
+              {{ item.value || "-" }}
+            </div>
+          </div>
+        </div>
+      </nut-popup>
     </div>
     <div class="mine-order">
       <div class="operation-list flex">
@@ -114,7 +138,12 @@
 
 <script setup>
 import { ref } from "vue";
-import { wxappMyInfo,wxappLogout } from "@/api/api";
+import {
+  wxappMyInfo,
+  wxappLogout,
+  wxappLoginN2,
+  wxappMyCompany,
+} from "@/api/api";
 import { menuList } from "@/utils/publicData";
 import { onLoad } from "@dcloudio/uni-app";
 const active = ref(2);
@@ -246,7 +275,9 @@ const goodsList = ref([
 ]);
 const userInfoData = ref({});
 const isShowLogout = ref(false);
-const userImg = ref("")
+const userImg = ref("");
+const showBasic = ref(false);
+const companyList = ref([]);
 const tabSwitch = (item, index) => {
   if (index != menuIndex) {
     //不是当前菜单才跳转
@@ -257,9 +288,9 @@ const tabSwitch = (item, index) => {
 };
 const getMyInfo = async () => {
   try {
-		uni.getUserInfo({
+    uni.getUserInfo({
       success: (res) => {
-				userImg.value = res?.userInfo?.avatarUrl
+        userImg.value = res?.userInfo?.avatarUrl;
       },
     });
     const res = await wxappMyInfo();
@@ -304,9 +335,44 @@ const onOk = () => {
   uni.login({
     provider: "weixin",
     success: function (loginRes) {
-       preLogout(loginRes);
+      preLogout(loginRes);
     },
   });
+};
+const wxappLogin = async (params) => {
+  try {
+    await wxappLoginN2(params);
+    uni.showToast({
+      title: "切换公司成功，正在刷新！",
+      icon: "none",
+      duration: 2000,
+    });
+    showBasic.value = false;
+    getMyInfo();
+  } catch (err) {
+    console.error("公司登录失败:", err);
+  }
+};
+const checkCompany = (item) => {
+  uni.login({
+    provider: "weixin",
+    success: function (loginRes) {
+      let params = {
+        companyId: item.code,
+        code: loginRes.code,
+      };
+      wxappLogin(params);
+    },
+  });
+};
+const getCompanyList = async () => {
+  const res = await wxappMyCompany();
+  companyList.value = res;
+  showBasic.value = true;
+};
+const openCompany = () => {
+  getCompanyList();
+  showBasic.value = true;
 };
 onLoad(() => {
   getMyInfo();
@@ -336,6 +402,10 @@ page {
     > .user-info {
       font-weight: bold;
       margin-left: 20rpx;
+      .change-company-span {
+        font-size: 24rpx;
+        margin-left: 20rpx;
+      }
     }
   }
 }
@@ -457,5 +527,33 @@ page {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.company {
+  max-height: 400rpx;
+  .company-title {
+    display: flex;
+
+    font-size: 28rpx;
+    color: #333;
+    line-height: 80rpx;
+    .company-title-txt {
+      text-align: center;
+      flex: 10;
+    }
+    .company-title-del {
+      flex: 1;
+    }
+  }
+  .company-div {
+    max-height: 400rpx;
+    overflow-y: auto;
+    .company-sub-div {
+      border-top: 1rpx solid #f0f0f0;
+      font-size: 28rpx;
+      color: #333;
+      text-align: center;
+      line-height: 80rpx;
+    }
+  }
 }
 </style>

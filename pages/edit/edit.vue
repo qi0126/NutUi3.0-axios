@@ -143,7 +143,6 @@ const filter = (type, options) => {
   return options;
 };
 const confirm = ({ selectedValue, selectedOptions }) => {
-  console.log("aaa:", selectedOptions);
   if (selectedOptions && selectedOptions.length >= 3) {
     let timeTxt = `${selectedOptions[0].value || "2023"}-${
       selectedOptions[1].value || "00"
@@ -166,8 +165,6 @@ const openCompany = () => {
   show.value = true;
 };
 const popupConfirm = (e, index) => {
-  console.log("e:", e, index);
-  // orderDetailObj.value.receiveCompany = e.selectedValue;
   show.value = true;
 };
 const getData = async (e) => {
@@ -180,7 +177,6 @@ const getData = async (e) => {
   });
   currentDate.value = new Date(resTemp.createTime);
   orderDetailObj.value = resTemp;
-  console.log("edit:", resTemp);
 };
 onLoad((e) => {
   getData(e);

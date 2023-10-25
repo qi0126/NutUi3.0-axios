@@ -108,7 +108,6 @@ function componentWeapp() {
 
     // 选择的是哪个 option
     changeHandler(changeIndex, columnsList.value[changeIndex][data.detail.value[changeIndex]])
-    // console.log('设置默认值');
 
     defaultIndexes.value = defaultValuesConvert()
   }

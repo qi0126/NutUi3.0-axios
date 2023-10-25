@@ -21,12 +21,17 @@ const defaultHeader = {
 };
 
 function request(url, data, method = "GET", options = {}) {
+  
   const { header = {}, timeout = 30000, loading } = options;
-  let methodNew = method
+  let methodNew = method;
   if (method === "postJson") {
     //请求为postJson
     defaultHeader["Content-type"] = "application/json;charset=UTF-8";
-    methodNew = "post"
+    methodNew = "post";
+  } else {
+    defaultHeader["Content-type"] =
+      "application/x-www-form-urlencoded;charset=UTF-8";
+    methodNew = method;
   }
   return new Promise((resolve, reject) => {
     if (loading) {
@@ -36,7 +41,7 @@ function request(url, data, method = "GET", options = {}) {
     }
     uni.request({
       url: `${baseApiUrl + url}`,
-      method:methodNew,
+      method: methodNew,
       data: data || {},
       header: {
         accessToken: uni.getStorageSync("accessToken"),

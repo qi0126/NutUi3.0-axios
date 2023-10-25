@@ -43,4 +43,3 @@ export function material_appletGetList(params) {
 export function material_appletGetMaterialInfo(params) {
   return http.get("/material_applet/getMaterialInfo", params);
 }
-

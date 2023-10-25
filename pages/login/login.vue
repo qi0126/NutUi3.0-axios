@@ -128,6 +128,7 @@ const isDisabled = computed(() => {
 });
 const autoLoginFunc = async (data, code) => {
   let params = { code, data: data.encryptedData, iv: data.iv };
+
   try {
     const res = await autoLogin(params);
     uni.setStorage({

@@ -169,7 +169,6 @@ function onDelete(file: FileItem, index: number) {
     })
   }
   else {
-    // console.log('用户阻止了删除！');
   }
 }
 

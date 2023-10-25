@@ -65,7 +65,9 @@
       </div>
     </div>
     <div class="order-foot">
-      <nut-button type="primary" @click="toEdit">编辑</nut-button>
+      <div class="edit-btn">
+        <nut-button type="primary" @click="toEdit">编辑</nut-button>
+      </div>
     </div>
   </div>
 </template>
@@ -78,13 +80,13 @@ import utils from "@/utils/index";
 import { material_appletGetMaterialInfo } from "@/api/api";
 
 const orderDetailObj = ref({});
-const orderId = ref("")
+const orderId = ref("");
 const getWeight = (weight) => {
   if (!weight) return "0 kg";
   return utils.moneyFormat(weight) + " kg";
 };
 const getData = async (e) => {
-  orderId.value = e.id
+  orderId.value = e.id;
   const res = await material_appletGetMaterialInfo({ id: e.id });
   let resTemp = JSON.parse(JSON.stringify(res));
   resTemp.billDateDay = moment(resTemp.billDate).format("YYYY-MM-DD");
@@ -93,13 +95,12 @@ const getData = async (e) => {
     ielem.gramWeightTxt = utils.moneyFormat(ielem.gramWeight);
   });
   orderDetailObj.value = resTemp;
-  // console.log("e:", resTemp);
 };
-const toEdit = ()=>{
+const toEdit = () => {
   uni.navigateTo({
-    url: `/pages/edit/edit?id=${orderId.value}`
-  })
-}
+    url: `/pages/edit/edit?id=${orderId.value}`,
+  });
+};
 onLoad((e) => {
   getData(e);
 });
@@ -133,14 +134,21 @@ page {
       border-bottom: 1rpx solid #f0f0f0;
     }
   }
-  .order-foot{
+  .order-foot {
     position: fixed;
     bottom: 0;
+    height: 90rpx;
     line-height: 90rpx;
     background-color: #fff;
     text-align: right;
-    width:100%;
-    padding-right:24rpx;
+    width: 100%;
+    padding-top:14rpx;
+    border-top: 1rpx solid #f0f0f0;
+    .edit-btn {
+      position: absolute;
+      bottom: 20rpx;
+      right: 20rpx;
+    }
   }
 }
 </style>

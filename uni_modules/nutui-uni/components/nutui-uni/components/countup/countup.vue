@@ -368,9 +368,6 @@ function machineLuck() {
     setTimeout(() => {
       const turn = distance * (i + 1 + Number.parseFloat(String(machineTrunMoreNum)))
       if (data.prizeYPrev.length !== 0) {
-        // this.machineTransition = 'none';
-        // console.log(this.prizeYPrev[i]-(this.numHeight * this.machinePrizeNum));
-        // this.$set(data.prizeY, i, data.prizeYPrev[i]);
         data.prizeY[i] = data.prizeYPrev[i]
       }
       const local = data.prizeYPrev[i] ? data.prizeYPrev[i] : 0

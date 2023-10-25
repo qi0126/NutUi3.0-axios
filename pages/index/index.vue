@@ -129,7 +129,6 @@ const showDataTxt = computed(() => {
 });
 const openSwitch = () => {
   if (dateTimeList.value.length === 2) {
-    console.log("openSwitch", dateTimeList.value);
     dateStart.value = [dateTimeList.value[0], dateTimeList.value[1]];
   } else {
     dateStart.value = [
