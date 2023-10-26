@@ -1,35 +1,35 @@
 <script setup lang="ts">
-import { computed, defineComponent } from 'vue'
-import { PREFIX, pxCheck } from '../_utils'
-import Icon from '../icon/icon.vue'
-import { cellEmits, cellProps } from './cell'
+import { computed, defineComponent } from "vue";
+import { PREFIX, pxCheck } from "../_utils";
+import Icon from "../icon/icon.vue";
+import { cellEmits, cellProps } from "./cell";
 
-const props = defineProps(cellProps)
-const emits = defineEmits(cellEmits)
+const props = defineProps(cellProps);
+const emits = defineEmits(cellEmits);
 
 const classes = computed(() => {
-  const prefixCls = componentName
+  const prefixCls = componentName;
   return {
     [prefixCls]: true,
     [`${prefixCls}--clickable`]: props.isLink || props.to,
     [`${prefixCls}--center`]: props.center,
-    [`${prefixCls}--large`]: props.size === 'large',
-  }
-})
+    [`${prefixCls}--large`]: props.size === "large",
+  };
+});
 
 const baseStyle = computed(() => {
   return {
     borderRadius: pxCheck(props.roundRadius),
-  }
-})
+  };
+});
 
 function handleClick(event: Event) {
-  emits('click', event)
+  emits("click", event);
 }
 </script>
 
 <script lang="ts">
-const componentName = `${PREFIX}-cell`
+const componentName = `${PREFIX}-cell`;
 
 export default defineComponent({
   name: componentName,
@@ -37,14 +37,18 @@ export default defineComponent({
     virtualHost: true,
     addGlobalClass: true,
     // #ifndef H5
-    styleIsolation: 'shared',
+    styleIsolation: "shared",
     // #endif
   },
-})
+});
 </script>
 
 <template>
-  <view :class="[classes, customClass]" :style="[baseStyle, customStyle]" @click="handleClick">
+  <view
+    :class="[classes, customClass]"
+    :style="[baseStyle, customStyle]"
+    @click="handleClick"
+  >
     <slot>
       <view v-if="$slots.icon" class="nut-cell__icon">
         <slot name="icon" />
@@ -67,11 +71,17 @@ export default defineComponent({
         </template>
       </view>
       <view
-        v-if="desc" class="nut-cell__value"
-        :class="{ 'nut-cell__value--alone': (!title && !subTitle && !$slots.title) }"
+        v-if="desc"
+        class="nut-cell__value"
+        :class="{
+          'nut-cell__value--alone': !title && !subTitle && !$slots.title,
+        }"
         :style="{ 'text-align': descTextAlign }"
       >
         {{ desc }}
+      </view>
+      <view v-else class="nut-cell__value">
+        <slot name="desc"></slot>
       </view>
       <slot name="link">
         <Icon v-if="isLink || to" name="right" class="nut-cell__link" />
@@ -81,5 +91,11 @@ export default defineComponent({
 </template>
 
 <style lang="scss">
-@import './index';
+@import "./index";
+.nut-cell__title {
+  width: 40%;
+}
+.nut-cell__value {
+  width: 60%;
+}
 </style>

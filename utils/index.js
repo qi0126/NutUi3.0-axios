@@ -33,10 +33,16 @@ const utils = {
     return arr;
   },
   // picker数组格式化
-  pickerArrayFormat(arr){
-    let newArr = _.cloneDeepWith(arr)
-    return newArr
-  }
+  pickerArrayFormat(arr, textName, valueName) {
+    let newArr = [];
+    arr.forEach((item) => {
+      newArr.push({
+        text: item[textName],
+        value: item[valueName],
+      });
+    });
+    return newArr;
+  },
 };
 
-export default utils
+export default utils;

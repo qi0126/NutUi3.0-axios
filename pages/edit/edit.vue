@@ -146,9 +146,9 @@ const confirm = ({ selectedValue, selectedOptions }) => {
   if (selectedOptions && selectedOptions.length >= 3) {
     let timeTxt = `${selectedOptions[0].value || "2023"}-${
       selectedOptions[1].value || "00"
-    }-${selectedOptions[2].value || "00"} ${
-      selectedOptions[3].value || "00"
-    }:00:00`;
+    }-${selectedOptions[2].value || "00"} ${selectedOptions[3].value || "00"}:${
+      selectedOptions[4].value || "00"
+    }:00`;
     currentDate.value = new Date(timeTxt);
     orderDetailObj.value.createTime = timeTxt;
   }

@@ -1,6 +1,5 @@
 .nut-theme-dark {
   .nut-input {
-    background: $dark-background;
 
     &__label {
       color: $dark-color;
@@ -16,14 +15,17 @@
 input,
 textarea {
   font: inherit;
-
+  color: #333;
   .nut-placeholder {
+    color:#808080
     // font: inherit;
   }
 }
 
 textarea {
+  color: #333;
   .nut-placeholder {
+    color:#808080
     // padding: 0 2px;
     // font: inherit;
   }
@@ -37,7 +39,6 @@ textarea {
   padding: 10px 25px;
   font-size: $input-font-size;
   line-height: 20px;
-  background: $white;
 
   &.center {
     align-items: center;

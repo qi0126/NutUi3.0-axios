@@ -49,3 +49,9 @@ export function material_appletGetReceiveCompanyList(params) {
   return http.get("/material_applet/getReceiveCompanyList", params);
 }
 
+// 获取品类列表
+export function material_appletGetCategoryList(params) {
+  return http.get("/material_applet/getCategoryList", params);
+}
+
+
