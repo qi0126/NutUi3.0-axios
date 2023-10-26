@@ -1,3 +1,4 @@
+import _ from "lodash-es";
 const utils = {
   // 重量千分数
   moneyFormat(value) {
@@ -31,6 +32,11 @@ const utils = {
     });
     return arr;
   },
+  // picker数组格式化
+  pickerArrayFormat(arr){
+    let newArr = _.cloneDeepWith(arr)
+    return newArr
+  }
 };
 
 export default utils

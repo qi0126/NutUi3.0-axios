@@ -30,6 +30,12 @@
       "style": {
         "navigationBarTitleText": "订单编辑"
       }
+    },
+    {
+      "path": "pages/edit/add",
+      "style": {
+        "navigationBarTitleText": "新建订单"
+      }
     }
   ],
 

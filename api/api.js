@@ -43,3 +43,9 @@ export function material_appletGetList(params) {
 export function material_appletGetMaterialInfo(params) {
   return http.get("/material_applet/getMaterialInfo", params);
 }
+
+// 报料对象
+export function material_appletGetReceiveCompanyList(params) {
+  return http.get("/material_applet/getReceiveCompanyList", params);
+}
+

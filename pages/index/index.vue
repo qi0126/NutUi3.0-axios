@@ -8,7 +8,9 @@
         ></nut-input>
       </template>
       <template #right>
-        <nut-button type="primary" size="small">报料</nut-button>
+        <nut-button type="primary" size="small" @click="addOrder"
+          >报料</nut-button
+        >
       </template>
     </nut-navbar>
 
@@ -196,6 +198,11 @@ const returnFunc = () => {
   dateTimeList.value = [];
   isVisible.value = false;
   getData();
+};
+const addOrder = () => {
+  uni.navigateTo({
+    url: `/pages/edit/add`,
+  });
 };
 
 onLoad(() => {

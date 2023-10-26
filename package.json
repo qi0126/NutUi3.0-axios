@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@dcloudio/uni-app": "^2.0.2-3081220230817001",
+    "lodash-es": "^4.17.21",
     "moment": "^2.29.4"
   }
 }
