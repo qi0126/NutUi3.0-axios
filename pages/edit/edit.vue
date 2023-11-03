@@ -15,14 +15,14 @@
             {{ orderDetailObj.receiveCompany || "-" }}
           </div>
           <nut-popup position="bottom" v-model:visible="show">
-            <nut-picker
+            <!-- <nut-picker
               v-model="orderDetailObj.receiveCompany"
               :columns="columns"
               title="选择报料对象"
               @confirm="popupConfirm"
               @cancel="show = false"
             >
-            </nut-picker>
+            </nut-picker> -->
           </nut-popup>
         </nut-form-item>
         <nut-form-item
@@ -67,28 +67,95 @@
       <div class="order-detail-list">
         <div v-for="(item, index) in orderDetailObj.detailList" :key="index">
           <nut-cell-group>
-            <nut-cell :title="`明细${index + 1}`"></nut-cell>
+            <div class="order-detail-item">
+              <div class="order-detail-item-left">明细{{ index + 1 }}</div>
+              <div class="order-detail-item-right" @click="delItem(index)">
+                移除
+              </div>
+            </div>
+
             <nut-cell
               title="品类"
               size="large"
-              :desc="item.category || '-'"
-            ></nut-cell>
+              is-link
+              @click="openCate(item, index)"
+            >
+              <template #desc>
+                {{ item.category || "请选择品类" }}
+              </template>
+            </nut-cell>
             <nut-cell
               title="成色"
               size="large"
-              :desc="item.fineness || '-'"
+              is-link
+              @click="openFineness(item, index)"
+            >
+              <template #desc>
+                {{ item.fineness || "请选择成色" }}
+              </template></nut-cell
+            >
+            <nut-cell title="重量(kg)" size="large">
+              <template #desc>
+                <input
+                  v-model="item.gramWeight"
+                  clearable
+                  type="number"
+                  size="small"
+                  input-align="right"
+                  placeholder="请输入重量"
+                /> </template
             ></nut-cell>
-            <nut-cell
-              title="重量(kg)"
-              size="large"
-              :desc="getWeight(item.gramWeight)"
-            ></nut-cell>
-            <nut-cell
-              title="备注"
-              size="large"
-              :desc="item.detailMark || '-'"
-            ></nut-cell>
+            <nut-cell title="备注" size="large">
+              <template #desc>
+                <input
+                  v-model="item.detailMark"
+                  clearable
+                  size="small"
+                  input-align="right"
+                  placeholder="请输入备注"
+                />
+              </template>
+            </nut-cell>
           </nut-cell-group>
+        </div>
+        <nut-popup position="bottom" v-model:visible="isShowCate">
+          <nut-picker
+            :columns="cateList"
+            title="请选择品类"
+            @confirm="confirmCate"
+            @cancel="isShowCate = false"
+          >
+          </nut-picker>
+        </nut-popup>
+        <nut-popup position="bottom" v-model:visible="isShowFineness">
+          <nut-picker
+            :columns="finenessList"
+            title="请选择品类"
+            @confirm="confirmFineness"
+            @cancel="isShowFineness = false"
+          >
+          </nut-picker>
+        </nut-popup>
+      </div>
+    </div>
+    <div class="footer-height" v-show="isShowFooter"></div>
+    <div class="footer" v-show="isShowFooter">
+      <div class="footer-addBtn">
+        <nut-button plain type="primary" block @click="addDetail">
+          + 添加明细</nut-button
+        >
+      </div>
+      <div class="footer-info">
+        <div class="footer-info-left">
+          <div>{{ sumWeight }}</div>
+          <div v-if="orderDetailObj.detailList">
+            总计报料:{{ orderDetailObj.detailList.length || 0 }}项
+          </div>
+        </div>
+        <div class="footer-info-right">
+          <nut-button type="primary" @click="confirmOrder">
+            确认信息</nut-button
+          >
         </div>
       </div>
     </div>
@@ -100,21 +167,30 @@ import moment from "moment";
 import { onLoad } from "@dcloudio/uni-app";
 import { ref, computed, watch } from "vue";
 import utils from "@/utils/index";
-import { material_appletGetMaterialInfo } from "@/api/api";
+import {
+  material_appletGetMaterialInfo,
+  material_appletGetReceiveCompanyList,
+  material_appletGetCategoryList,
+  material_appletEdit,
+} from "@/api/api";
 
 const orderDetailObj = ref({});
 const show = ref(false);
 const showTime = ref(false);
-const columns = ref([
-  { text: "南京市", value: "NanJing" },
-  { text: "无锡市", value: "WuXi" },
-  { text: "海北藏族自治区", value: "ZangZu" },
-  { text: "北京市", value: "BeiJing" },
-  { text: "亮仔销售1", value: "LianYunGang" },
-  { text: "浙江市", value: "ZheJiang" },
-  { text: "江苏市", value: "JiangSu" },
-]);
+const isShowCate = ref(false);
+const editItemIndex = ref(null);
+const finenessList = ref([]);
+const cateList = ref([]);
+const companyList = ref([]);
+const isShowFineness = ref(false);
 const currentDate = ref(new Date());
+const isShowFooter = ref(true);
+const orderId = ref(null);
+const verifyOrderOneList = [
+  { value: "receiveCompany", text: "报料对象" },
+  { value: "deliveryDate", text: "交货日期" },
+  { value: "billMark", text: "单据备注" },
+];
 
 const formatter = (type, option) => {
   switch (type) {
@@ -178,7 +254,191 @@ const getData = async (e) => {
   currentDate.value = new Date(resTemp.createTime);
   orderDetailObj.value = resTemp;
 };
+const openCate = (e, index) => {
+  editItemIndex.value = index;
+  isShowCate.value = true;
+};
+//品类确认
+const confirmCate = (e) => {
+  if (e.selectedOptions.length && e.selectedOptions[0].conditiList) {
+    orderDetailObj.value.detailList[editItemIndex.value].cateObj =
+      e.selectedOptions[0];
+    orderDetailObj.value.detailList[editItemIndex.value].finenessList =
+      e.selectedOptions[0].conditiList;
+  }
+
+  orderDetailObj.value.detailList[editItemIndex.value].category =
+    e.selectedOptions[0].name || null;
+
+  isShowCate.value = false;
+};
+const openFineness = async (e) => {
+  finenessList.value = e.finenessList || [];
+  if (!finenessList.value.length) {
+    uni.showToast({
+      title: "品类未选择",
+      icon: "none",
+      duration: 2000,
+    });
+    return;
+  }
+  isShowFineness.value = true;
+};
+const confirmFineness = (e) => {
+  if (e.selectedOptions.length) {
+    orderDetailObj.value.detailList[editItemIndex.value].fineness =
+      e.selectedOptions[0].text || null;
+    orderDetailObj.value.detailList[editItemIndex.value].finenessObj =
+      e.selectedOptions[0];
+  }
+  isShowFineness.value = false;
+};
+const addDetail = () => {
+  orderDetailObj.value.detailList.push({});
+};
+const delItem = (index) => {
+  if (orderDetailObj.value.detailList.length <= 1) {
+    uni.showToast({
+      title: "只有一条明细，不能被删除！",
+      icon: "none",
+      duration: 2000,
+    });
+    return;
+  }
+  orderDetailObj.value.detailList.splice(index, 1);
+};
+const getCompany = async () => {
+  try {
+    const res = await material_appletGetReceiveCompanyList();
+    companyList.value = utils.pickerArrayFormat(
+      res,
+      "receiveCompany",
+      "receiveCompanyId"
+    );
+    const resCate = await material_appletGetCategoryList();
+    resCate.forEach((item) => {
+      let conditiList = [];
+      item.conditi.split(",").forEach((ielem) => {
+        conditiList.push({ text: ielem, value: ielem });
+      });
+      item.conditiList = conditiList;
+      item.text = item.name;
+      item.value = item.id;
+    });
+    cateList.value = resCate;
+  } catch (err) {
+    console.error("err:", err);
+  }
+};
+const sumWeight = computed(() => {
+  let weightNum = 0;
+  console.log("aaa:", orderDetailObj.value);
+  if (
+    orderDetailObj.value &&
+    orderDetailObj.value.detailList &&
+    orderDetailObj.value.detailList.length
+  ) {
+    orderDetailObj.value.detailList.forEach((item) => {
+      weightNum += item.gramWeight ? Number(item.gramWeight) : 0;
+    });
+  }
+
+  return utils.moneyFormat(weightNum) + "kg";
+});
+
+const verifyOrder = (e) => {
+  let isVerify = true;
+  verifyOrderOneList.forEach((item) => {
+    if (!e[item.value]) {
+      uni.showToast({
+        title: item.text + "不能为空！",
+        icon: "none",
+        duration: 2000,
+      });
+      isVerify = false;
+    }
+  });
+
+  if (e.detailJson.length && isVerify) {
+    e.detailJson.forEach((ielem) => {
+      if (!ielem.category) {
+        uni.showToast({
+          title: "品类不能为空！",
+          icon: "none",
+          duration: 2000,
+        });
+        isVerify = false;
+      } else if (!ielem.fineness) {
+        uni.showToast({
+          title: "成色不能为空！",
+          icon: "none",
+          duration: 2000,
+        });
+        isVerify = false;
+      } else if (!ielem.gramWeight) {
+        uni.showToast({
+          title: "报料重量不能为空！",
+          icon: "none",
+          duration: 2000,
+        });
+        isVerify = false;
+      }
+    });
+  }
+  console.log("校验:", e);
+  return isVerify;
+};
+const editOrder = async (e) => {
+  if (!verifyOrder(e)) {
+    return;
+  }
+  try {
+    await material_appletEdit(e);
+    uni.showToast({
+      title: "添加成功,正在返回列表页！",
+      icon: "none",
+      duration: 2000,
+      success: (res) => {
+        uni.navigateTo({
+          url: `/pages/index/index`,
+        });
+      },
+    });
+  } catch (err) {
+    console.error("新增失败:", err);
+  }
+};
+const confirmOrder = () => {
+  const {
+    billMark,
+    receiveCompany,
+    receiveCompanyId,
+    deliveryDate,
+    detailList,
+  } = orderDetailObj.value;
+  let newArr = [];
+  detailList.forEach((ielem) => {
+    const { category, fineness, gramWeight, detailMark } = ielem;
+    newArr.push({
+      category,
+      fineness,
+      gramWeight,
+      detailMark,
+    });
+  });
+  let params = {
+    id: orderId.value,
+    billMark,
+    receiveCompany,
+    receiveCompanyId,
+    deliveryDate,
+    detailJson: newArr,
+  };
+  editOrder(params); //新增报料
+};
 onLoad((e) => {
+  orderId.value = e.id;
+  getCompany();
   getData(e);
 });
 </script>
@@ -209,6 +469,49 @@ page {
       font-weight: bold;
       line-height: 80rpx;
       border-bottom: 1rpx solid #f0f0f0;
+    }
+    &-item {
+      display: flex;
+      line-height: 80rpx;
+      background: var(--nut-cell-background, var(--nut-white, #fff));
+      padding: 0 20rpx;
+      &-left {
+        flex: 1;
+      }
+      &-right {
+        flex: 1;
+        text-align: right;
+        color: red;
+      }
+    }
+  }
+  .footer-height {
+    height: 200rpx;
+  }
+  .footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 200rpx;
+    box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.1);
+    padding-top: 24rpx;
+    z-index: 999;
+    background: #fff;
+    &-addBtn {
+      padding: 0 20rpx;
+      height: 90rpx;
+      line-height: 90rpx;
+      border-bottom: 1rpx solid #f0f0f0;
+    }
+    &-info {
+      display: flex;
+      &-left {
+        flex: 1;
+      }
+      &-right {
+        flex: 1;
+        text-align: right;
+      }
     }
   }
 }

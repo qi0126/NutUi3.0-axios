@@ -58,3 +58,8 @@ export function material_appletGetCategoryList(params) {
 export function material_appletAdd(params) {
   return http.postJson("/material_applet/add", params);
 }
+
+//编辑报料
+export function material_appletEdit(params) {
+  return http.postJson("/material_applet/edit", params);
+}

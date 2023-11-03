@@ -368,11 +368,6 @@ const sumWeight = computed(() => {
   });
   return utils.moneyFormat(weightNum) + "kg";
 });
-const verifyItem = (e) => {
-  let isVerifyTf = true;
-
-  return isVerifyTf;
-};
 const verifyOrder = (e) => {
   let isVerify = true;
   verifyOrderOneList.forEach((item) => {
