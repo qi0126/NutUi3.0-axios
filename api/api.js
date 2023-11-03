@@ -54,4 +54,7 @@ export function material_appletGetCategoryList(params) {
   return http.get("/material_applet/getCategoryList", params);
 }
 
-
+//新增报料
+export function material_appletAdd(params) {
+  return http.postJson("/material_applet/add", params);
+}
