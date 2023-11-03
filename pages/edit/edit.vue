@@ -14,15 +14,15 @@
           <div class="nut-input-text" @click="openCompany">
             {{ orderDetailObj.receiveCompany || "-" }}
           </div>
-          <nut-popup position="bottom" v-model:visible="show">
-            <!-- <nut-picker
-              v-model="orderDetailObj.receiveCompany"
-              :columns="columns"
+          <nut-popup position="bottom" v-model:visible="isShow">
+            <nut-picker
+              v-model="orderDetailObj.receiveCompanyList"
+              :columns="companyList"
               title="选择报料对象"
               @confirm="popupConfirm"
-              @cancel="show = false"
+              @cancel="isShow = false"
             >
-            </nut-picker> -->
+            </nut-picker>
           </nut-popup>
         </nut-form-item>
         <nut-form-item
@@ -120,6 +120,7 @@
         </div>
         <nut-popup position="bottom" v-model:visible="isShowCate">
           <nut-picker
+            v-model="categoryChecked"
             :columns="cateList"
             title="请选择品类"
             @confirm="confirmCate"
@@ -129,8 +130,9 @@
         </nut-popup>
         <nut-popup position="bottom" v-model:visible="isShowFineness">
           <nut-picker
+            v-model="finenessChecked"
             :columns="finenessList"
-            title="请选择品类"
+            title="请选择成色"
             @confirm="confirmFineness"
             @cancel="isShowFineness = false"
           >
@@ -175,8 +177,8 @@ import {
 } from "@/api/api";
 
 const orderDetailObj = ref({});
-const show = ref(false);
 const showTime = ref(false);
+const isShow = ref(false);
 const isShowCate = ref(false);
 const editItemIndex = ref(null);
 const finenessList = ref([]);
@@ -184,8 +186,9 @@ const cateList = ref([]);
 const companyList = ref([]);
 const isShowFineness = ref(false);
 const currentDate = ref(new Date());
-const isShowFooter = ref(true);
 const orderId = ref(null);
+const categoryChecked = ref([]); //品类picker回填index
+const finenessChecked = ref([]); //成色picker回填index
 const verifyOrderOneList = [
   { value: "receiveCompany", text: "报料对象" },
   { value: "deliveryDate", text: "交货日期" },
@@ -213,11 +216,16 @@ const formatter = (type, option) => {
 };
 
 const filter = (type, options) => {
-  // if (type == "hour") {
-  //   return options.filter((option) => Number(option.value) % 1 === 0);
-  // }
   return options;
 };
+const isShowFooter = computed(() => {
+  return !(
+    isShowFineness.value ||
+    isShowCate.value ||
+    showTime.value ||
+    isShow.value
+  );
+});
 const confirm = ({ selectedValue, selectedOptions }) => {
   if (selectedOptions && selectedOptions.length >= 3) {
     let timeTxt = `${selectedOptions[0].value || "2023"}-${
@@ -230,82 +238,29 @@ const confirm = ({ selectedValue, selectedOptions }) => {
   }
   showTime.value = false;
 };
-const getWeight = (weight) => {
-  if (!weight) return "0 kg";
-  return utils.moneyFormat(weight) + " kg";
-};
 const openTime = () => {
   showTime.value = true;
 };
 const openCompany = () => {
-  show.value = true;
+  orderDetailObj.value.receiveCompanyList = [
+    orderDetailObj.value.receiveCompanyId,
+  ];
+  isShow.value = true;
 };
-const popupConfirm = (e, index) => {
-  show.value = true;
-};
-const getData = async (e) => {
-  const res = await material_appletGetMaterialInfo({ id: e.id });
-  let resTemp = JSON.parse(JSON.stringify(res));
-  resTemp.billDateDay = moment(resTemp.billDate).format("YYYY-MM-DD");
-  resTemp.detailList = JSON.parse(resTemp.detailJson);
-  resTemp.detailList.forEach((ielem) => {
-    ielem.gramWeightTxt = utils.moneyFormat(ielem.gramWeight);
-  });
-  currentDate.value = new Date(resTemp.createTime);
-  orderDetailObj.value = resTemp;
-};
-const openCate = (e, index) => {
-  editItemIndex.value = index;
-  isShowCate.value = true;
-};
-//品类确认
-const confirmCate = (e) => {
-  if (e.selectedOptions.length && e.selectedOptions[0].conditiList) {
-    orderDetailObj.value.detailList[editItemIndex.value].cateObj =
-      e.selectedOptions[0];
-    orderDetailObj.value.detailList[editItemIndex.value].finenessList =
-      e.selectedOptions[0].conditiList;
+const popupConfirm = (e) => {
+  if (e.selectedValue && e.selectedValue.length) {
+    let companyObj = {};
+    companyList.value.forEach((item) => {
+      companyObj[item.value] = item.text;
+    });
+    orderDetailObj.value.receiveCompany = companyObj[e.selectedValue[0]];
+    orderDetailObj.value.receiveCompanyId = e.selectedValue[0];
+  } else {
+    orderDetailObj.value.receiveCompany = "";
+    orderDetailObj.value.receiveCompanyId = null;
   }
 
-  orderDetailObj.value.detailList[editItemIndex.value].category =
-    e.selectedOptions[0].name || null;
-
-  isShowCate.value = false;
-};
-const openFineness = async (e) => {
-  finenessList.value = e.finenessList || [];
-  if (!finenessList.value.length) {
-    uni.showToast({
-      title: "品类未选择",
-      icon: "none",
-      duration: 2000,
-    });
-    return;
-  }
-  isShowFineness.value = true;
-};
-const confirmFineness = (e) => {
-  if (e.selectedOptions.length) {
-    orderDetailObj.value.detailList[editItemIndex.value].fineness =
-      e.selectedOptions[0].text || null;
-    orderDetailObj.value.detailList[editItemIndex.value].finenessObj =
-      e.selectedOptions[0];
-  }
-  isShowFineness.value = false;
-};
-const addDetail = () => {
-  orderDetailObj.value.detailList.push({});
-};
-const delItem = (index) => {
-  if (orderDetailObj.value.detailList.length <= 1) {
-    uni.showToast({
-      title: "只有一条明细，不能被删除！",
-      icon: "none",
-      duration: 2000,
-    });
-    return;
-  }
-  orderDetailObj.value.detailList.splice(index, 1);
+  isShow.value = false;
 };
 const getCompany = async () => {
   try {
@@ -328,11 +283,90 @@ const getCompany = async () => {
     cateList.value = resCate;
   } catch (err) {
     console.error("err:", err);
+  } finally {
+    orderDetailObj.value.detailList.forEach((ielem) => {
+      ielem.finenessList =
+        cateList.value.find((jelem) => jelem.text === ielem.category)
+          .conditiList || [];
+    });
   }
 };
+const getData = async (e) => {
+  try {
+    const res = await material_appletGetMaterialInfo({ id: e.id });
+    let resTemp = JSON.parse(JSON.stringify(res));
+    resTemp.billDateDay = moment(resTemp.billDate).format("YYYY-MM-DD");
+    resTemp.detailList = JSON.parse(resTemp.detailJson);
+    resTemp.detailList.forEach((ielem) => {
+      ielem.gramWeightTxt = utils.moneyFormat(ielem.gramWeight);
+    });
+    currentDate.value = new Date(resTemp.createTime);
+    orderDetailObj.value = resTemp;
+  } catch (err) {
+    console.error("err:", err);
+  } finally {
+    getCompany();
+  }
+};
+const openCate = (e, index) => {
+  editItemIndex.value = index;
+  categoryChecked.value = [
+    cateList.value.find((item) => item.text === e.category)?.value,
+  ];
+  isShowCate.value = true;
+};
+//品类确认
+const confirmCate = (e) => {
+  if (e.selectedOptions.length && e.selectedOptions[0].conditiList) {
+    orderDetailObj.value.detailList[editItemIndex.value].cateObj =
+      e.selectedOptions[0];
+    orderDetailObj.value.detailList[editItemIndex.value].finenessList =
+      e.selectedOptions[0].conditiList;
+  }
+
+  orderDetailObj.value.detailList[editItemIndex.value].category =
+    e.selectedOptions[0].name || null;
+  orderDetailObj.value.detailList[editItemIndex.value].fineness = null;
+  finenessChecked.value = [];
+
+  isShowCate.value = false;
+};
+const openFineness = async (e, index) => {
+  editItemIndex.value = index;
+  finenessChecked.value = [e.fineness];
+  finenessList.value = e.finenessList || [];
+  if (!finenessList.value.length) {
+    uni.showToast({
+      title: "品类未选择",
+      icon: "none",
+      duration: 2000,
+    });
+    return;
+  }
+  isShowFineness.value = true;
+};
+const confirmFineness = (e) => {
+  let editItem = orderDetailObj.value.detailList[editItemIndex.value];
+  editItem.fineness = e.selectedValue[0] || editItem.finenessList[0].value;
+  isShowFineness.value = false;
+};
+const addDetail = () => {
+  orderDetailObj.value.detailList.push({});
+};
+const delItem = (index) => {
+  if (orderDetailObj.value.detailList.length <= 1) {
+    uni.showToast({
+      title: "只有一条明细，不能被删除！",
+      icon: "none",
+      duration: 2000,
+    });
+    return;
+  }
+  orderDetailObj.value.detailList.splice(index, 1);
+};
+
 const sumWeight = computed(() => {
   let weightNum = 0;
-  console.log("aaa:", orderDetailObj.value);
   if (
     orderDetailObj.value &&
     orderDetailObj.value.detailList &&
@@ -385,7 +419,6 @@ const verifyOrder = (e) => {
       }
     });
   }
-  console.log("校验:", e);
   return isVerify;
 };
 const editOrder = async (e) => {
@@ -438,7 +471,7 @@ const confirmOrder = () => {
 };
 onLoad((e) => {
   orderId.value = e.id;
-  getCompany();
+
   getData(e);
 });
 </script>

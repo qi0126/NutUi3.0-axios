@@ -149,7 +149,7 @@
         <nut-popup position="bottom" v-model:visible="isShowFineness">
           <nut-picker
             :columns="finenessList"
-            title="请选择品类"
+            title="请选择成色"
             @confirm="confirmFineness"
             @cancel="isShowFineness = false"
           >
@@ -202,7 +202,6 @@ const cateList = ref([]);
 
 const isShowCate = ref(false);
 const editItemIndex = ref(null);
-const editItem = ref({});
 
 const finenessList = ref([]);
 const isShowFineness = ref(false);
@@ -339,11 +338,9 @@ const openFineness = async (e) => {
   isShowFineness.value = true;
 };
 const confirmFineness = (e) => {
-  if (e.selectedOptions.length) {
+  if (e.selectedOptions && e.selectedOptions.length) {
     orderDetailObj.value.detailList[editItemIndex.value].fineness =
       e.selectedOptions[0].text || null;
-    orderDetailObj.value.detailList[editItemIndex.value].finenessObj =
-      e.selectedOptions[0];
   }
   isShowFineness.value = false;
 };
@@ -407,7 +404,6 @@ const verifyOrder = (e) => {
       }
     });
   }
-  console.log("校验:", e);
   return isVerify;
 };
 const addOrder = async (e) => {

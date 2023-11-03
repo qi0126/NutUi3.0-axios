@@ -62,6 +62,7 @@
             ></nut-cell>
           </nut-cell-group>
         </div>
+        <div class="footer-div"></div>
       </div>
     </div>
     <div class="order-foot">
@@ -134,6 +135,9 @@ page {
       border-bottom: 1rpx solid #f0f0f0;
     }
   }
+  .footer-div {
+    height: 70rpx;
+  }
   .order-foot {
     position: fixed;
     bottom: 0;
@@ -142,7 +146,7 @@ page {
     background-color: #fff;
     text-align: right;
     width: 100%;
-    padding-top:14rpx;
+    padding-top: 14rpx;
     border-top: 1rpx solid #f0f0f0;
     .edit-btn {
       position: absolute;
