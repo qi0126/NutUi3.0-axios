@@ -317,17 +317,18 @@ const openCate = (e, index) => {
 };
 //品类确认
 const confirmCate = (e) => {
-  if (e.selectedOptions.length && e.selectedOptions[0].conditiList) {
-    orderDetailObj.value.detailList[editItemIndex.value].cateObj =
-      e.selectedOptions[0];
-    orderDetailObj.value.detailList[editItemIndex.value].finenessList =
-      e.selectedOptions[0].conditiList;
-  }
+  let editItem = orderDetailObj.value.detailList[editItemIndex.value];
+  if (editItem.category != e.selectedOptions[0].name) {
+    //品类不一致才执行赋值
+    if (e.selectedOptions.length && e.selectedOptions[0].conditiList) {
+      editItem.cateObj = e.selectedOptions[0];
+      editItem.finenessList = e.selectedOptions[0].conditiList;
+    }
 
-  orderDetailObj.value.detailList[editItemIndex.value].category =
-    e.selectedOptions[0].name || null;
-  orderDetailObj.value.detailList[editItemIndex.value].fineness = null;
-  finenessChecked.value = [];
+    editItem.category = e.selectedOptions[0].name || null;
+    editItem.fineness = null;
+    finenessChecked.value = [];
+  }
 
   isShowCate.value = false;
 };
